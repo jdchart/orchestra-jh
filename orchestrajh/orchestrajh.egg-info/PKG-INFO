@@ -1,0 +1,13 @@
+Metadata-Version: 2.1
+Name: orchestrajh
+Version: 0.0.1
+Summary: Use spider in python.
+Home-page: 
+Author: 
+Author-email: jacob.dchart@gmail.com
+License: GLPv3+
+Description-Content-Type: text/markdown
+
+
+# orchestrajh
+A python package for converting musical scores.

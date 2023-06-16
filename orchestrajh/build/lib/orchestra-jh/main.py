@@ -1,6 +1,6 @@
-from preprocessing import *
-from staff_removal import *
-from helper_methods import *
+from .preprocessing import *
+from .staff_removal import *
+from .helper_methods import *
 
 import argparse
 import os

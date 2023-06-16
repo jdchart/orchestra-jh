@@ -72,4 +72,4 @@ def display(img):
     cv.resizeWindow('image', 1920, 1080)
     cv.imshow('image', img)
     if cv.waitKey(0) == 27:
-        cv2.destoyAllWindows() 
+        cv.destoyAllWindows() 
