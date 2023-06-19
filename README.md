@@ -7,3 +7,5 @@ I have wrapped the project up into a module and added some features to fit my ne
 
 - [ ] Exporting more data (export coordinates of each event).
 - [ ] Export to IIIF manifest.
+
+https://en.wikipedia.org/wiki/GUIDO_music_notation#:~:text=GUIDO%20Music%20Notation%20is%20a,musical%20notation%201%2C000%20years%20ago.

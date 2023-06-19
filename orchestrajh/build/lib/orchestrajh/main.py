@@ -92,7 +92,6 @@ def process_image(inputfolder, fn, f, model, root, exportConfig):
         for i in range(len(symbols_boundaries)):
             boundary = symbols_boundaries[i]
 
-
             label, cutted_boundaries = get_label_cutted_boundaries(boundary, height_before, cutted[it], model)
 
             if exportConfig["singleBoundariesData"]:
@@ -102,12 +101,22 @@ def process_image(inputfolder, fn, f, model, root, exportConfig):
                 export_image_region(os.path.join(inputfolder, fn), os.path.join(root, "data/boundary-" + str(it) + "-" + str(i) + "-" + str(label) + ".png"), reg)
 
             current_regions.append(reg)
+            
 
             if label == 'clef':
                 is_started = True
+
+            if len(cutted_boundaries) > 1:
+                print("\nCutted boundaries was len: " + str(len(cutted_boundaries)))
+                print("Boundary was: " + str(reg))
+                for cutted_boundary in cutted_boundaries:
+                    print("\t" + str(cutted_boundary))
+                
             
-            for cutted_boundary in cutted_boundaries:
+            for count in range(len(cutted_boundaries)):
+                cutted_boundary = cutted_boundaries[count]
                 _, y1, _, y2 = cutted_boundary
+
                 if is_started == True and label != 'barline' and label != 'clef':
                     text = text_operation(label, ref_lines[it], lines_spacing[it], y1, y2)
                     
@@ -127,22 +136,81 @@ def process_image(inputfolder, fn, f, model, root, exportConfig):
                         not_dot = label != 'dot'
                         f.write(not_dot * ' ' + text)
 
+
                         if not_dot:
-                            matrix.append({
-                                "item" : text,
-                                "regions" : current_regions
-                            })
-                            current_regions = []
+
+                            if len(cutted_boundaries) == 1:
+                                matrix.append({
+                                    "item" : text,
+                                    "regions" : current_regions
+                                })
+                                current_regions = []
+                            else:
+                                print("\tText: " + str(text))
+                                print("\tCurrent regions: " + str(current_regions))
+                                current_regions = []
+                                current_regions.append([
+                                    reg[0] + int(cutted_boundary[0]) + (int(cutted_boundary[2]) * count),
+                                    int(cutted_boundary[1]),
+                                    reg[0] + int(cutted_boundary[0]) + (int(cutted_boundary[2]) * count) + int(cutted_boundary[2]),
+                                    int(cutted_boundary[3]),
+                                ])
+                                print("\tCurrent regions converted: " + str(current_regions))
+                                matrix.append({
+                                    "item" : text,
+                                    "regions" : current_regions
+                                })
+                                current_regions = []
             
         height_before += cutted[it].shape[0]
         f.write(' ]\n')
 
         main_matrix["lines"].append(matrix)
         
+        
     if len(cutted) > 1:
         f.write('}')
 
+    if exportConfig["exportCompositeImages"]:
+        makeDirsRecustive([os.path.join(root, "data/composite-images")])
+        export_composite_images(main_matrix, os.path.join(inputfolder, fn), os.path.join(root, "data/composite-images"))
+
     writeJson(main_matrix, os.path.join(root, "data/matrix.json"))
+
+def export_composite_images(data, img, root_path):
+    for i in range(len(data["lines"])):
+        currentArray = data["lines"][i]
+        for j in range(len(currentArray)):
+            thisItem = currentArray[j]
+
+            imageFileName = "composite-" + str(i) + "-" + str(j) + ".png"
+            data["lines"][i][j]["composite_image_filename"] = imageFileName
+
+            compositeRegion = get_composite_region(thisItem["regions"])
+            data["lines"][i][j]["composite_image_region"] = compositeRegion
+            
+            export_image_region(img, os.path.join(root_path, imageFileName), compositeRegion)
+
+def get_composite_region(regionList):
+    if len(regionList) > 0:
+        currentX1 = regionList[0][0]
+        currentY1 = regionList[0][1]
+        currentX2 = regionList[0][2]
+        currentY2 = regionList[0][3]
+
+        for region in regionList:
+            if region[0] < currentX1:
+                currentX1 = region[0]
+            if region[1] < currentY1:
+                currentY1 = region[1]
+            if region[2] > currentX2:
+                currentX2 = region[2]
+            if region[3] > currentY2:
+                currentY2 = region[3]
+        
+        return [currentX1, currentY1, currentX2, currentY2]
+    else:
+        return [0, 0, 1, 1]
 
 def main_process(model, exportConfig):
     try: 
@@ -179,9 +247,10 @@ def process(inputDir: str, outputDir: str, **kwargs):
     params["accidentals"] = kwargs.get("accidentals", ['x', 'hash', 'b', 'symbol_bb', 'd'])
 
     exportConfig = {
-        "lineCutPositions" : kwargs.get("export_line_cut_positions", False),
-        "singleBoundariesData" : kwargs.get("export_single_boundaries_data", False),
-        "singleBoundariesImage" : kwargs.get("export_single_boundaries_image", True) 
+        "lineCutPositions" : kwargs.get("export_line_cut_positions", True),
+        "singleBoundariesData" : kwargs.get("export_single_boundaries_data", True),
+        "singleBoundariesImage" : kwargs.get("export_single_boundaries_image", True),
+        "exportCompositeImages" : kwargs.get("export_composite_images", True)
     }
 
     print(params)
