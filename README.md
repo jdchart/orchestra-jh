@@ -6,7 +6,7 @@ Kareem Mohamed](https://github.com/kareem3m) (available under [MIT License](http
 ## Changes:
 
 - Wrapped into a package
-- Exporting more data (export coordinates of each event).
+- Exporting more data (notably export coordinates of each event).
 
 ## Usage:
 
@@ -23,3 +23,14 @@ oc.process(
     filename = "/Users/jacob/Documents/Git Repos/orchestra-jh/model/model.sav" # the model, download here: https://github.com/AbdallahHemdan/Orchestra/tree/master/model (model.sav)
 )
 ```
+
+### Export kwargs:
+
+supply to `oc.process()`:
+
+- export_line_cut_positions
+- export_single_boundaries_data
+- export_single_boundaries_image
+- export_composite_images
+
+Will always export GUIDO score and a matrix of composite positions for each GUIDO element.
