@@ -177,6 +177,7 @@ def process_image(inputfolder, fn, f, model, root, exportConfig):
 
     writeJson(main_matrix, os.path.join(root, "data/matrix.json"))
 
+
 def export_composite_images(data, img, root_path):
     for i in range(len(data["lines"])):
         currentArray = data["lines"][i]
